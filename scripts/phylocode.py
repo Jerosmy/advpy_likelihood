@@ -4,7 +4,6 @@ import numpy as np
 import scipy
 import math
 
-
 class Tree: 
     def __init__(self):
         self.descendant={} #clé: parent | terme: enfants (un parent plusieurs enfant) - attribut 1
