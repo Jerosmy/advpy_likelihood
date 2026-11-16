@@ -5,8 +5,19 @@ import scipy
 import math
 
 
-class Tree: 
+class Tree:
+
     def __init__(self):
+        """ 
+        Attributes:
+            .descendant (dict): parent:children
+            .ascendant (dict): child:parent node
+            .branches (dict): child:branch length
+            .sequences (dict): leave:sequence
+            .root (str): root node, that has no parent, computed automatically
+            .sequlength (int): length of sequences (should be aligned, i.e. all of saem len)
+            .aligned (boolean): are all sequences of same length (i.e. aligned)?
+        """ 
         self.descendant={} #clé: parent | terme: enfants (un parent plusieurs enfant) - attribut 1
         self.ascendant={} #clé: enfant | terme: noeud parent (un descendant, un parent) - attribut 2
         self.branches={} #clé: enfant | terme: longueur de la branche - attribut 3
@@ -14,18 +25,28 @@ class Tree:
         self.root=None #Noeuds sans parent = racien - attribut 5
         self.seqlength=None #longueur des séquences
         self.aligned=False  #vériier que toutes les séquences sont de mêmes longueurs
+
     def __str__(self):
         lines=[]
         for nom, seq in self.sequences.items():
             lines.append(f"> {nom}: {seq}")
         return "\n".join(lines)
+
     def __len__(self):
         if self.seqlength is None: 
             raise ValueError("sequences have not been loaded, or sequences of different lengths")
         return self.seqlength
 
-    #Méthode 1: charger les données de parentés entre noeuds.
+    #Method 1
     def load_parente(self, nodes_path):
+        """ 
+        Attirbutes parent-child relationships
+        Args:
+            nodes_path (str): system path to a per node child-parent relationship .dat table.
+
+        Returns:
+            Nothing, automatic completion of .ascendent and .descendent attributes of a Tree object
+        """
         with open(nodes_path, "r") as nods:
             for line in nods:
                 line = line.replace("\n","")
@@ -41,27 +62,29 @@ class Tree:
                     self.root=rac
                     break
                 
-    #Méthode 2: charger les données correspondant à la longueur entre les noeuds. 
-    def load_branches(self, branches_path):
-        #Cette manière de faire correspond avec l'exemple du cours sur le pdf. 
-        #Parmi les enfants, si pas retrouvé chez les parents alors feuille terminale
-        leaf=[nods for nods in self.ascendant if nods not in self.descendant]
-        
-        #Parmi les parents si retrouvés chez les enfants alors noeuds interns
-        internalnodes=[nods for nods in self.descendant if nods in self.ascendant]
-
-        #Liste réodronnant les enfants de sorte à être alignés avec les position de longueurs des branches. 
-        ordnods=leaf+internalnodes
-        
-        with open(branches_path, "r") as brlen:
-            longueurs=[float(dis) for dis in brlen.read().replace("\n","").split(",")]
-            #for x in brlen.read().replace("\n","").split(","):
-                #longeurs.append(float(x))
-            for bl in range(len(longueurs)):
-               self.branches[ordnods[bl]]=longueurs[bl]
+    #Method 2
+    def load_branches(self, branches_path:str = "../data/branchlength.dat"):
+            """ 
+            Loads branch lengths in the Tree object
+            Args:
+                branches_path (str): Path to the branch length .dat file.Values should be in the same order as the node file and be separated by a ","
+            """
+            with open(branches_path,"r") as brlen:
+                branches_length=[float(bl) for bl in brlen.read().strip().split(",")]
+                childs=list(self.ascendant)
+                if len(branches_length)!=len(childs):
+                    raise ValueError("Kinship not loaded or number of branches isn't equal to the number of child")
+                else:
+                    for CID in range(len(childs)): #CID: Child ID, position in the list
+                        self.branches[childs[CID]]=branches_length[CID]
 
     #Méthode 3: charger les séquences associées aux feuilles de l'arbre. 
     def load_sequences(self,sequences_path):
+        """ 
+        Args:
+            sequences_path (str): Path to the sequences in a msa format 
+        """
+
         with open(sequences_path,"r") as seq:
             content=seq.read().strip().split("\n")
             for ns in content:
@@ -69,7 +92,6 @@ class Tree:
                 self.sequences[name]=sequence
         self.check_lengths()
 
-    
     #Méthode 4: définir l'ordre des calcules pour éviter de combiner des noeuds non résolus
     def define_order(self):
         order=[self.root]
@@ -89,6 +111,8 @@ class Tree:
             self.aligned=False
             self.seqlength=None
             print(f"Warning: different sequences lengths : {length}")
+
+
     def total_branch_lenght(self):
         return sum([bl for bl in self.branches.values()])
 
