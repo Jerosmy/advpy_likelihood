@@ -151,3 +151,9 @@ class Likelihood:
             results.append(probmuvar)
             #on pourrait ajouter la liste des résultats par site. 
         return results
+
+
+
+if __name__ == "__main__":
+    Likelihood()
+    Tree()
