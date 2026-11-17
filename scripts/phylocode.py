@@ -78,9 +78,11 @@ class Tree:
                     for CID in range(len(childs)): #CID: Child ID, position in the list
                         self.branches[childs[CID]]=branches_length[CID]
 
-    #Méthode 3: charger les séquences associées aux feuilles de l'arbre. 
+    #Method 3 
     def load_sequences(self,sequences_path):
         """ 
+        Load the sequences of the organisms from a .msa file.
+
         Args:
             sequences_path (str): Path to the sequences in a msa format 
         """
