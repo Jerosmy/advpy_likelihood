@@ -32,7 +32,7 @@ def getCommit():
 
 
 # Configuration
-LOG_DIR = "benchmark"
+LOG_DIR = "../benchmark"
 LOG_FILE = "benchmarks.csv"
 LOG_PATH = os.path.join(LOG_DIR, LOG_FILE)
 COLUMNS = ["timestamp", "run_id", "commit", "label", "os", "cpu_count",
