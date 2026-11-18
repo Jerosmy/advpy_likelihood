@@ -178,6 +178,48 @@ class Likelihood:
 
 
 
-if __name__ == "__main__":
-    Likelihood()
-    Tree()
+#Create the tree and load the data files
+from pathlib import Path
+
+#Folder with the data files, found from where this script is (advpy_likelihood/data)
+DATA = Path(__file__).resolve().parent.parent / "data"
+
+arbre = Tree()
+arbre.load_parente(DATA / "table.dat")
+arbre.load_branches(DATA / "branchlength.dat")
+arbre.load_sequences(DATA / "msa.dat")
+
+
+#C: changing branch lengths: One branch
+import matplotlib.pyplot as plt
+
+#Likelihood object with a fixed mu
+likelihood = Likelihood(0.3, arbre)
+
+#The branch we want to change
+branch = "Bos"
+original_length = arbre.branches[branch]   #remember the real value
+
+#The lengths we want to try: 0.01, 0.02, ..., 1.00
+lengths = [0.01 * i for i in range(1, 101)]
+results = []
+
+#For each length: change the branch, compute lnL, store it
+for length in lengths:
+    arbre.branches[branch] = length
+    lnL = likelihood.prob_sequence()
+    results.append(lnL)
+
+#Put the original length back, so the tree is not changed
+arbre.branches[branch] = original_length
+
+#Find the best length (the one with the highest lnL)
+best_lnL = max(results)
+best_length = lengths[results.index(best_lnL)]
+print("Best length:", round(best_length, 2), "with lnL =", round(best_lnL, 4))
+
+#Plot
+plt.plot(lengths, results)
+plt.xlabel(f"branch length of {branch}")
+plt.ylabel("ln L")
+plt.show()
