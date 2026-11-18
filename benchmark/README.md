@@ -1,0 +1,2 @@
+# Benchmarking tool for the Tree Lilelihood toolkit
+This module is designed to offer tools and functions needed for benchmarking the time efficiency of the different portions of the code used in this module.

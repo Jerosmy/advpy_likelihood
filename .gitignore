@@ -8,8 +8,9 @@
 
 # Local scripts
 
-# Test scripts/notebooks
+# Test scripts/notebooks/benchmarking
 tests/
+benchmark/benchmarks.csv
 
 
 
