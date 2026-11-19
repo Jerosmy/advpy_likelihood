@@ -153,11 +153,13 @@ class Likelihood:
 
     @timelog # Bottlneck (takes 10^3 more time to run)
     def prob_sequence(self):
-        nbsites=len(self.tree)
-        phyloprob=[]
-        for site in range(nbsites):
-            phyloprob.append(self.prob_site(site))
-        return sum(phyloprob)
+        
+        return sum([self.prob_site(site) for site in range(len(self.tree))])
+        #nbsites=len(self.tree)
+        #phyloprob=[]
+        #for site in range(nbsites):
+        #    phyloprob.append(self.prob_site(site))
+        #return sum(phyloprob)
         #on pourrait ajouter la liste des résultats par site. 
         
     @timelog
