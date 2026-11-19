@@ -3,6 +3,7 @@
 import numpy as np
 import scipy
 import math
+from benchmark.timelog import timelog
 
 class Tree: 
     def __init__(self):
@@ -13,17 +14,22 @@ class Tree:
         self.root=None #Noeuds sans parent = racien - attribut 5
         self.seqlength=None #longueur des séquences
         self.aligned=False  #vériier que toutes les séquences sont de mêmes longueurs
+
+    @timelog
     def __str__(self):
         lines=[]
         for nom, seq in self.sequences.items():
             lines.append(f"> {nom}: {seq}")
         return "\n".join(lines)
+
+    @timelog
     def __len__(self):
         if self.seqlength is None: 
             raise ValueError("sequences have not been loaded, or sequences of different lengths")
         return self.seqlength
 
     #Méthode 1: charger les données de parentés entre noeuds.
+    @timelog
     def load_parente(self, nodes_path):
         with open(nodes_path, "r") as nods:
             for line in nods:
@@ -41,6 +47,7 @@ class Tree:
                     break
                 
     #Méthode 2: charger les données correspondant à la longueur entre les noeuds. 
+    @timelog
     def load_branches(self, branches_path):
         #Cette manière de faire correspond avec l'exemple du cours sur le pdf. 
         #Parmi les enfants, si pas retrouvé chez les parents alors feuille terminale
@@ -60,6 +67,7 @@ class Tree:
                self.branches[ordnods[bl]]=longueurs[bl]
 
     #Méthode 3: charger les séquences associées aux feuilles de l'arbre. 
+    @timelog
     def load_sequences(self,sequences_path):
         with open(sequences_path,"r") as seq:
             content=seq.read().strip().split("\n")
@@ -70,6 +78,7 @@ class Tree:
 
     
     #Méthode 4: définir l'ordre des calcules pour éviter de combiner des noeuds non résolus
+    @timelog
     def define_order(self):
         order=[self.root]
         for nod in order:
@@ -78,6 +87,7 @@ class Tree:
         order.reverse()
         return order 
 
+    @timelog
     #Méthode 5: vérification des longueurs
     def check_lengths(self):
         length=[len(seq) for seq in self.sequences.values()]
@@ -88,12 +98,15 @@ class Tree:
             self.aligned=False
             self.seqlength=None
             print(f"Warning: different sequences lengths : {length}")
+
+    @timelog
     def total_branch_lenght(self):
         return sum([bl for bl in self.branches.values()])
 
 
 
 class Likelihood:
+    @timelog
     def __init__(self,mu,tree,):
         self.mu=None
         self.Q=None
@@ -101,11 +114,14 @@ class Likelihood:
         self.onehotvectors={"A":[1,0,0,0],"C":[0,1,0,0],"G":[0,0,1,0],"T":[0,0,0,1]}
         self.pi=np.array([1/4,1/4,1/4,1/4])
         self.tree=tree
+    
     #Méthode 1: construire la matrice de transition Q à partir de mu
+    @timelog
     def transition_matrix(self, mu):
         self.mu=mu
         self.Q=np.array([[-3*mu,mu,mu,mu],[mu,-3*mu,mu,mu],[mu,mu,-3*mu,mu],[mu,mu,mu,-3*mu]])
 
+    @timelog
     def prob_site(self, site): #revoir ce qu'on a envie de faire, tout calculer d'un coup
         descendant=self.tree.descendant
         root=self.tree.root
@@ -134,6 +150,8 @@ class Likelihood:
                 probs[a]=vec
         npmm=np.matmul(probs[root],self.pi)
         return math.log(npmm)
+
+    @timelog
     def prob_sequence(self):
         nbsites=len(self.tree)
         phyloprob=[]
@@ -142,6 +160,7 @@ class Likelihood:
         return sum(phyloprob)
         #on pourrait ajouter la liste des résultats par site. 
         
+    @timelog
     def variable_mu(self, mus):
         results=[]
         for mu in mus:
