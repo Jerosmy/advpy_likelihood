@@ -12,6 +12,8 @@
 tests/
 benchmark/benchmarks.csv
 
+# Computer files
+.DS_Store
 
 
 ###### Do not modify from this point on: automaticly genrated gitignore for VS code. 

@@ -63,11 +63,11 @@ Set the `BENCHMARK_LABEL` environment variable before running your script. The c
 
 ```bash
 # Linux / macOS
-BENCHMARK_LABEL=baseline python my_script.py
+BENCHMARK_LABEL=baseline python -m scripts.createTree
 
 # Windows (cmd)
 set BENCHMARK_LABEL=baseline
-python my_script.py
+python -m scripts.createTree
 ```
 
 Change the label after each optimization (`with_cache`, `numpy`, ...) and run again.

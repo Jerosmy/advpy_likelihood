@@ -151,7 +151,7 @@ class Likelihood:
         npmm=np.matmul(probs[root],self.pi)
         return math.log(npmm)
 
-    @timelog
+    @timelog # Bottlneck (takes 10^3 more time to run)
     def prob_sequence(self):
         nbsites=len(self.tree)
         phyloprob=[]
