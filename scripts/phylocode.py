@@ -27,21 +27,21 @@ class Tree:
         self.aligned=False  #vériier que toutes les séquences sont de mêmes longueurs
         self.order = None # Save order of branches instead of always recomputing
 
-    @timelog
+    #@timelog
     def __str__(self):
         lines=[]
         for nom, seq in self.sequences.items():
             lines.append(f"> {nom}: {seq}")
         return "\n".join(lines)
 
-    @timelog
+    #@timelog
     def __len__(self):
         if self.seqlength is None: 
             raise ValueError("sequences have not been loaded, or sequences of different lengths")
         return self.seqlength
 
     #Méthode 1: charger les données de parentés entre noeuds.
-    @timelog
+    #@timelog
     def load_parente(self, nodes_path):
         """ 
         Attirbutes parent-child relationships
@@ -67,7 +67,7 @@ class Tree:
                     break
                 
     #Méthode 2: charger les données correspondant à la longueur entre les noeuds. 
-    @timelog
+    #@timelog
     def load_branches(self, branches_path):
         """ 
         Loads branch lengths in the Tree object
@@ -92,7 +92,7 @@ class Tree:
                self.branches[ordnods[bl]]=longueurs[bl]
 
     #Méthode 3: charger les séquences associées aux feuilles de l'arbre. 
-    @timelog
+    #@timelog
     def load_sequences(self,sequences_path):
         """ 
         Load the sequences of the organisms from a .msa file.
@@ -109,7 +109,7 @@ class Tree:
 
     
     #Méthode 4: définir l'ordre des calcules pour éviter de combiner des noeuds non résolus
-    @timelog
+    #@timelog
     def define_order(self):
         if self.order is None:
             order = [self.root]
@@ -121,7 +121,7 @@ class Tree:
         
         return self.order
 
-    @timelog
+    #@timelog
     #Méthode 5: vérification des longueurs
     def check_lengths(self):
         """ 
@@ -136,14 +136,14 @@ class Tree:
             self.seqlength=None
             print(f"Warning: different sequences lengths : {length}")
 
-    @timelog
+    #@timelog
     def total_branch_lenght(self):
         return sum([bl for bl in self.branches.values()])
 
 
 
 class Likelihood:
-    @timelog
+    #@timelog
     def __init__(self,mu,tree,):
         """ 
         Creates a Likelihood object
@@ -157,7 +157,7 @@ class Likelihood:
         self.prob_matrix = {}
     
     #Méthode 1: construire la matrice de transition Q à partir de mu
-    #@timelog
+    ##@timelog
     def transition_matrix(self, mu):
         """ 
         Constructs and attributes the transition matrix
@@ -169,7 +169,7 @@ class Likelihood:
         self.mu=mu
         self.Q=np.array([[-3*mu,mu,mu,mu],[mu,-3*mu,mu,mu],[mu,mu,-3*mu,mu],[mu,mu,mu,-3*mu]])
 
-    #def prob_mat(self):
+    def prob_mat(self):
         """ 
         Precomputes branch-wise probability matrixes
         Args :
@@ -188,7 +188,7 @@ class Likelihood:
         
 
     
-    #@timelog
+    ##@timelog
     def prob_site(self, site): 
         """ 
         
@@ -232,7 +232,7 @@ class Likelihood:
         #return sum(phyloprob)
         #on pourrait ajouter la liste des résultats par site. 
         
-    @timelog
+    ##@timelog
     def variable_mu(self, mus):
         results=[]
         for mu in mus:
