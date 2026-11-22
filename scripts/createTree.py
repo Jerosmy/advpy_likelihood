@@ -24,6 +24,7 @@ def createTree(fpath="./data/table.dat", BRANCHPATH="./data/branchlength.dat", S
     draft=pc.Likelihood(0.3, arbre)
 
     ##Computation
+    draft.prob_mat()
     draft_results= draft.prob_sequence()
 
     return draft_results
