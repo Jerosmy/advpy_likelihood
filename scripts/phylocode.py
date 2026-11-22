@@ -1,5 +1,5 @@
 #!/opt/anaconda3/bin/python
-
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 import math
@@ -128,6 +128,12 @@ class Likelihood:
         self.onehotvectors={"A":[1,0,0,0],"C":[0,1,0,0],"G":[0,0,1,0],"T":[0,0,0,1]}
         self.pi=np.array([1/4,1/4,1/4,1/4])
         self.tree=tree
+        self.mus=None
+        self.mus_results=None
+        self.mu_max=None
+        self.lnL_max=None
+
+
     #Méthode 1: construire la matrice de transition Q à partir de mu
     def transition_matrix(self, mu):
         self.mu=mu
@@ -161,22 +167,54 @@ class Likelihood:
                 probs[a]=vec
         npmm=np.matmul(probs[root],self.pi)
         return math.log(npmm)
+    
     def prob_sequence(self):
         nbsites=len(self.tree)
         phyloprob=[]
         for site in range(nbsites):
             phyloprob.append(self.prob_site(site))
-        return sum(phyloprob)
-        #on pourrait ajouter la liste des résultats par site. 
+        return round(float(sum(phyloprob)),4)
+        #Idea: save results for each site
         
-    def variable_mu(self, mus):
+    def variable_mu(self,start=0.05,stop=3,step=1/6,mus=None):
+        if mus is None:
+            self.mus=list(np.arange(start,stop,step))
+        else:
+            self.mus=list(mus)
+        if min(self.mus)<=0:
+            raise ValueError("Mu values must be >0 !")
         results=[]
-        for mu in mus:
+        for mu in self.mus:
             self.transition_matrix(mu)
             probmuvar=self.prob_sequence()
-            results.append(probmuvar)
-            #on pourrait ajouter la liste des résultats par site. 
-        return results
+            results.append(probmuvar) 
+        self.mus_results=results
+        #Idea: saving results under matrix (2 x mus)
+        #return results
+
+    def prob_max(self):
+        if self.mus_results is None:
+            raise ValueError("Run the variable_mu function first!")
+        else:
+            self.lnL_max=max(self.mus_results)
+            index_prob_max =np.argmax(self.mus_results)
+            self.mu_max=self.mus[index_prob_max]
+            return f"Maximum probability: {self.lnL_max}, its mu value: {self.mu_max}."
+    def plot_likelihood(self):
+        if self.mus_results is None:
+            raise ValueError("Run the variable_mu function first!")
+        else:
+            self.prob_max()
+            plt.plot(self.mus,self.mus_results, color="darkblue", linewidth=1)
+            plt.plot(self.mu_max,self.lnL_max,"o",color="red",label=f"max={self.mu_max:.2f}")
+            y_vline_lim=plt.ylim()[0]
+            plt.vlines(self.mu_max,y_vline_lim,self.lnL_max,color="red",linestyles="--")
+            plt.ylim(bottom=y_vline_lim)
+            plt.xlabel("mu")
+            plt.ylabel("lnL")
+            plt.legend()
+            plt.show()
+
 
 
 
