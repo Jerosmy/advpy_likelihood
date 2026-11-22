@@ -25,6 +25,7 @@ class Tree:
         self.root=None #Noeuds sans parent = racien - attribut 5
         self.seqlength=None #longueur des séquences
         self.aligned=False  #vériier que toutes les séquences sont de mêmes longueurs
+        self.order = None # Save order of branches instead of always recomputing
 
     @timelog
     def __str__(self):
@@ -110,15 +111,15 @@ class Tree:
     #Méthode 4: définir l'ordre des calcules pour éviter de combiner des noeuds non résolus
     @timelog
     def define_order(self):
-        """ 
-        Sorts the nodes to avoid merging unresolved nodes
-        """
-        order=[self.root]
-        for nod in order:
-            if nod in self.descendant:
-                order.extend(self.descendant[nod])
-        order.reverse()
-        return order 
+        if self.order is None:
+            order = [self.root]
+            for nod in order:
+                if nod in self.descendant:
+                    order.extend(self.descendant[nod])
+            order.reverse()
+            self.order = order
+        
+        return self.order
 
     @timelog
     #Méthode 5: vérification des longueurs
@@ -156,7 +157,7 @@ class Likelihood:
         self.prob_matrix = {}
     
     #Méthode 1: construire la matrice de transition Q à partir de mu
-    @timelog
+    #@timelog
     def transition_matrix(self, mu):
         """ 
         Constructs and attributes the transition matrix
@@ -168,7 +169,7 @@ class Likelihood:
         self.mu=mu
         self.Q=np.array([[-3*mu,mu,mu,mu],[mu,-3*mu,mu,mu],[mu,mu,-3*mu,mu],[mu,mu,mu,-3*mu]])
 
-    def prob_mat(self):
+    #def prob_mat(self):
         """ 
         Precomputes branch-wise probability matrixes
         Args :
@@ -187,7 +188,7 @@ class Likelihood:
         
 
     
-    @timelog
+    #@timelog
     def prob_site(self, site): 
         """ 
         
@@ -195,7 +196,7 @@ class Likelihood:
         descendant=self.tree.descendant
         root=self.tree.root
         probs={}
-        for a in self.tree.define_order():
+        for a in self.tree.order:
             if a !=root:
                 #t=self.tree.branches[a]
                 #proba_matrix=scipy.linalg.expm(self.Q*t)
@@ -208,19 +209,19 @@ class Likelihood:
                     k1,k2=descendant[a]
                     pk1=probs[k1]
                     pk2=probs[k2]
-                    vec=[float(pk1[i]*pk2[i]) for i in range(4)]
+                    vec = np.asarray(pk1) * np.asarray(pk2)
                     p=np.matmul(proba_matrix,vec)
                     probs[a]=p
             else: 
                 k1,k2=descendant[a]
                 pk1=probs[k1]
                 pk2=probs[k2]
-                vec=[float(pk1[i]*pk2[i]) for i in range(4)]
+                vec = np.asarray(pk1) * np.asarray(pk2)
                 probs[a]=vec
         npmm=np.matmul(probs[root],self.pi)
         return math.log(npmm)
 
-    @timelog # Bottlneck (takes 10^3 more time to run)
+    #@timelog # Bottlneck (takes 10^3 more time to run)
     def prob_sequence(self):
         
         return sum([self.prob_site(site) for site in range(len(self.tree))])
